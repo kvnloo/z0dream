@@ -1,43 +1,31 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "z0dream",
-  "version": "0.1.0",
-  "description": "Zoom into anything. Recursively turn generated images into explorable ultra-high-resolution worlds.",
-  "author": {
-    "name": "z0"
-  },
+  "version": "0.1.1",
+  "description": "Zoom into anything. Turn images into recursive dream chains with fresh detail at every zoom.",
+  "author": { "name": "z0" },
   "repository": "https://github.com/kvnloo/z0dream",
   "license": "MIT",
-  "keywords": [
-    "image-generation",
-    "zoom",
-    "recursive",
-    "high-resolution",
-    "creative"
-  ],
+  "keywords": ["image-generation", "zoom", "recursive", "high-resolution", "creative"],
   "extensions": {
     "com.openai": {
       "interface": {
         "displayName": "z0dream",
         "shortDescription": "Zoom into anything.",
-        "longDescription": "Create an image, select any detail, and recursively dream deeper into it. z0dream synthesizes new detail at each zoom level instead of stretching old pixels.",
+        "longDescription": "Create an image, choose any detail, and dream deeper into it. Each step synthesizes fresh local detail while preserving the parent scene.",
         "developerName": "z0",
         "category": "Creativity",
-        "capabilities": [
-          "Read",
-          "Write"
-        ],
+        "capabilities": [],
         "defaultPrompt": [
-          "Use z0dream to create a world I can keep zooming into.",
-          "Open z0dream and let me dream deeper into an image.",
-          "Create an ultra-detailed recursive image with z0dream."
+          "Create a world I can keep zooming into.",
+          "Dream deeper into the most interesting detail in this image.",
+          "Turn this image into a recursive zoom chain."
         ],
         "brandColor": "#8D64FF",
         "websiteURL": "https://github.com/kvnloo/z0dream",
         "privacyPolicyURL": "https://github.com/kvnloo/z0dream/blob/main/PRIVACY.md",
         "termsOfServiceURL": "https://github.com/kvnloo/z0dream/blob/main/TERMS.md"
-      },
-      "apps": "./.app.json"
+      }
     }
   }
 }
