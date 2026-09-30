@@ -3,10 +3,18 @@
   "name": "z0dream",
   "version": "0.1.0",
   "description": "Zoom into anything. Recursively turn generated images into explorable ultra-high-resolution worlds.",
-  "author": { "name": "z0" },
+  "author": {
+    "name": "z0"
+  },
   "repository": "https://github.com/kvnloo/z0dream",
   "license": "MIT",
-  "keywords": ["image-generation","zoom","recursive","high-resolution","creative"],
+  "keywords": [
+    "image-generation",
+    "zoom",
+    "recursive",
+    "high-resolution",
+    "creative"
+  ],
   "extensions": {
     "com.openai": {
       "interface": {
@@ -15,7 +23,10 @@
         "longDescription": "Create an image, select any detail, and recursively dream deeper into it. z0dream synthesizes new detail at each zoom level instead of stretching old pixels.",
         "developerName": "z0",
         "category": "Creativity",
-        "capabilities": ["Read","Write"],
+        "capabilities": [
+          "Read",
+          "Write"
+        ],
         "defaultPrompt": [
           "Use z0dream to create a world I can keep zooming into.",
           "Open z0dream and let me dream deeper into an image.",
@@ -25,7 +36,8 @@
         "websiteURL": "https://github.com/kvnloo/z0dream",
         "privacyPolicyURL": "https://github.com/kvnloo/z0dream/blob/main/PRIVACY.md",
         "termsOfServiceURL": "https://github.com/kvnloo/z0dream/blob/main/TERMS.md"
-      }
+      },
+      "apps": "./.app.json"
     }
   }
 }
