@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>z0dream — zoom into anything</title>
+  <style>
+    *{box-sizing:border-box} html,body{width:100%;height:100%;margin:0;overflow:hidden}
+    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f7f7fb;background:#07070a;color-scheme:dark}
+    body{background:radial-gradient(circle at 50% -10%,#1f1830 0,#0c0b12 35%,#060609 75%)}
+    button,input{font:inherit} button{color:inherit}
+    #app{width:100%;height:100%;min-height:420px;position:relative;display:flex;flex-direction:column}
+    .grain{pointer-events:none;position:absolute;inset:0;opacity:.11;mix-blend-mode:screen;z-index:30;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E")}
+    header{height:62px;display:flex;align-items:center;gap:12px;padding:0 16px;z-index:40;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(5,5,8,.62);backdrop-filter:blur(20px)}
+    .mark{width:28px;height:28px;border-radius:9px;background:conic-gradient(from 220deg,#fff,#9f78ff,#45d9ff,#fff);box-shadow:0 0 28px rgba(157,113,255,.38);position:relative}
+    .mark:after{content:"";position:absolute;inset:2px;border-radius:7px;background:#09090d}
+    .brand{font-weight:750;letter-spacing:-.04em;font-size:17px}.brand span{opacity:.44;font-weight:600}
+    .spacer{flex:1}
+    .stat{font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.54);padding:7px 9px;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(255,255,255,.035)}
+    .icon-btn{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.055);border-radius:10px;padding:8px 10px;cursor:pointer}.icon-btn:hover{background:rgba(255,255,255,.1)}
+    #viewport{flex:1;position:relative;overflow:hidden;touch-action:none;cursor:grab}
+    #viewport.dragging{cursor:grabbing} #viewport.selecting{cursor:crosshair}
+    #scene{position:absolute;width:1024px;height:1024px;transform-origin:0 0;will-change:transform;border-radius:18px;overflow:hidden;background:#12121a;box-shadow:0 30px 100px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.08)}
+    .layer{position:absolute;object-fit:cover;user-select:none;-webkit-user-drag:none;transition:opacity .3s ease,filter .3s ease;pointer-events:none}
+    .layer:not(.root){filter:saturate(1.04) contrast(1.02);box-shadow:0 0 0 1px rgba(255,255,255,.06)}
+    #selection{display:none;position:absolute;border:2px solid rgba(255,255,255,.95);background:rgba(160,115,255,.13);box-shadow:0 0 0 9999px rgba(4,3,8,.18),0 0 34px rgba(143,102,255,.42);pointer-events:none;z-index:20}
+    #selection:after{content:"dream deeper";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:700 12px/1 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;text-shadow:0 1px 10px #000}
+    .hud{position:absolute;left:16px;bottom:16px;z-index:45;display:flex;align-items:center;gap:8px;padding:8px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(8,7,12,.72);backdrop-filter:blur(18px);box-shadow:0 16px 50px rgba(0,0,0,.28)}
+    .hud button{border:0;border-radius:9px;padding:9px 11px;background:transparent;cursor:pointer;font-size:12px;font-weight:650}.hud button:hover{background:rgba(255,255,255,.07)}
+    .hud .primary{background:linear-gradient(135deg,#8d64ff,#5a8cff);box-shadow:0 6px 22px rgba(112,89,255,.28)}.hud .primary:hover{background:linear-gradient(135deg,#9b75ff,#6c99ff)}
+    #zoom-label{min-width:52px;text-align:center;font:600 11px ui-monospace,monospace;color:rgba(255,255,255,.5)}
+    #depth-rail{position:absolute;right:16px;top:78px;z-index:45;width:210px;max-height:calc(100% - 160px);overflow:auto;padding:10px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:rgba(7,7,11,.62);backdrop-filter:blur(20px)}
+    .rail-title{display:flex;align-items:center;justify-content:space-between;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45);margin:2px 4px 8px}
+    .node-chip{width:100%;display:flex;gap:9px;align-items:center;text-align:left;border:0;background:transparent;padding:8px;border-radius:10px;cursor:pointer}.node-chip:hover{background:rgba(255,255,255,.06)}
+    .node-dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,rgba(158,116,255,.95),rgba(74,203,255,.78));box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+    .node-copy{min-width:0}.node-copy b{display:block;font-size:11px}.node-copy small{display:block;color:rgba(255,255,255,.4);font:10px ui-monospace,monospace;margin-top:2px}
+    #landing{position:absolute;inset:62px 0 0;display:grid;place-items:center;padding:24px;z-index:25;background:radial-gradient(circle at 50% 45%,rgba(125,89,255,.12),transparent 37%)}
+    .hero{width:min(720px,100%);text-align:center}.eyebrow{font:650 11px ui-monospace,monospace;letter-spacing:.13em;text-transform:uppercase;color:#aa91ff;margin-bottom:20px}
+    h1{margin:0;font-size:clamp(42px,8vw,84px);line-height:.92;letter-spacing:-.07em;font-weight:760}.shine{background:linear-gradient(100deg,#fff 10%,#bba5ff 42%,#8de8ff 72%,#fff);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 7s linear infinite}@keyframes shine{to{background-position:-200% 0}}
+    .sub{max-width:540px;margin:20px auto 27px;color:rgba(255,255,255,.52);font-size:15px;line-height:1.5}
+    .promptbox{display:flex;gap:9px;padding:7px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.065);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.28);backdrop-filter:blur(18px)}
+    .promptbox input{min-width:0;flex:1;border:0;outline:0;color:white;background:transparent;padding:11px 12px;font-size:14px}.promptbox input::placeholder{color:rgba(255,255,255,.34)}
+    .promptbox button{border:0;border-radius:11px;padding:11px 16px;cursor:pointer;font-weight:700;background:white;color:#0b0a10;white-space:nowrap}.promptbox button:disabled{opacity:.45;cursor:wait}
+    .examples{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin-top:13px}.example{border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.035);color:rgba(255,255,255,.46);border-radius:999px;padding:7px 10px;font-size:11px;cursor:pointer}.example:hover{color:white;background:rgba(255,255,255,.07)}
+    #toast{position:absolute;left:50%;top:78px;transform:translate(-50%,-12px);z-index:80;opacity:0;pointer-events:none;padding:10px 13px;border-radius:11px;background:rgba(15,13,21,.92);border:1px solid rgba(255,255,255,.11);font-size:12px;box-shadow:0 10px 35px rgba(0,0,0,.35);transition:.25s}.show-toast #toast{opacity:1;transform:translate(-50%,0)}
+    #dreaming{position:absolute;inset:0;z-index:70;display:none;place-items:center;background:rgba(4,3,8,.28);backdrop-filter:blur(2px);pointer-events:none}.busy #dreaming{display:grid}.orb{width:92px;height:92px;border-radius:50%;background:conic-gradient(from 0deg,transparent,#a77cff,#72d9ff,transparent);animation:spin 1.25s linear infinite;padding:2px;box-shadow:0 0 70px rgba(132,101,255,.35)}.orb:after{content:"";display:block;width:100%;height:100%;border-radius:50%;background:#0b0911}.dream-label{position:absolute;font:700 10px ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}@keyframes spin{to{transform:rotate(360deg)}}
+    @media(max-width:720px){header{height:54px;padding:0 10px}.brand span{display:none}.stat.nodes{display:none}#landing{inset:54px 0 0}.hud{left:10px;bottom:10px}.hud .text-hide{display:none}#depth-rail{right:10px;top:66px;width:150px;max-height:35%;opacity:.82}h1{font-size:52px}.promptbox{flex-direction:column}.promptbox button{width:100%}}
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="grain"></div>
+  <header>
+    <div class="mark"></div><div class="brand">z0dream <span>/ recursive resolution</span></div>
+    <div class="spacer"></div>
+    <div id="resolution" class="stat">—</div><div id="nodes" class="stat nodes">0 layers</div>
+    <button id="fullscreen" class="icon-btn" title="Fullscreen">↗</button>
+  </header>
+  <div id="viewport">
+    <div id="scene"><div id="selection"></div></div>
+  </div>
+  <div id="depth-rail"><div class="rail-title"><span>dream tree</span><span id="max-depth">d0</span></div><div id="node-list"></div></div>
+  <div class="hud">
+    <button id="minus">−</button><span id="zoom-label">100%</span><button id="plus">+</button>
+    <button id="fit" class="text-hide">fit</button>
+    <button id="deeper" class="primary">✦ <span class="text-hide">dream deeper</span></button>
+  </div>
+  <section id="landing">
+    <div class="hero">
+      <div class="eyebrow">recursive image synthesis</div>
+      <h1>zoom into<br><span class="shine">anything.</span></h1>
+      <p class="sub">Create an image, select any detail, then dream deeper. Every zoom adds new resolution instead of stretching old pixels.</p>
+      <form id="create-form" class="promptbox">
+        <input id="prompt" autocomplete="off" placeholder="an impossible city built inside a glass marble…" maxlength="4000" />
+        <button id="create" type="submit">start dreaming</button>
+      </form>
+      <div class="examples">
+        <button id="pick-image" class="example" style="display:none">＋ use an existing image</button><button class="example prompt-example">a vast renaissance library</button><button class="example prompt-example">an alien night market</button><button class="example prompt-example">a tiny world inside a watch</button>
+      </div>
+    </div>
+  </section>
+  <div id="toast"></div>
+  <div id="dreaming"><div class="orb"></div><div class="dream-label">dreaming deeper</div></div>
+</div>
+<script type="module">
+  const appEl=document.querySelector('#app'),viewport=document.querySelector('#viewport'),scene=document.querySelector('#scene'),selection=document.querySelector('#selection');
+  const landing=document.querySelector('#landing'),nodeList=document.querySelector('#node-list'),resolution=document.querySelector('#resolution'),nodesStat=document.querySelector('#nodes'),maxDepth=document.querySelector('#max-depth'),zoomLabel=document.querySelector('#zoom-label');
+  let dream=null,zoom=1,fitScale=1,panX=0,panY=0,drag=null,selectMode=false,selectionStart=null,busy=false,rpcId=0;
+  const pending=new Map();
+  const rpcNotify=(method,params)=>window.parent.postMessage({jsonrpc:'2.0',method,params},'*');
+  const rpcRequest=(method,params)=>new Promise((resolve,reject)=>{const id=++rpcId;pending.set(id,{resolve,reject});window.parent.postMessage({jsonrpc:'2.0',id,method,params},'*')});
+  const updateFromResponse=(response)=>{const d=response?.structuredContent?.dream;if(d){dream=d;renderDream()}};
+  window.addEventListener('message',(event)=>{if(event.source!==window.parent)return;const m=event.data;if(!m||m.jsonrpc!=='2.0')return;if(typeof m.id==='number'){const p=pending.get(m.id);if(!p)return;pending.delete(m.id);m.error?p.reject(m.error):p.resolve(m.result);return}if(m.method==='ui/notifications/tool-result')updateFromResponse(m.params)},{passive:true});
+  const bridgeReady=(async()=>{await rpcRequest('ui/initialize',{appInfo:{name:'z0dream-viewer',version:'0.1.0'},appCapabilities:{},protocolVersion:'2026-01-26'});rpcNotify('ui/notifications/initialized',{})})();
+  async function callTool(name,args){await bridgeReady;setBusy(true);try{const r=await rpcRequest('tools/call',{name,arguments:args});updateFromResponse(r);return r}finally{setBusy(false)}}
+  function setBusy(v){busy=v;appEl.classList.toggle('busy',v)}
+  function toast(text){document.querySelector('#toast').textContent=text;appEl.classList.add('show-toast');clearTimeout(toast.t);toast.t=setTimeout(()=>appEl.classList.remove('show-toast'),1800)}
+  function renderDream(){landing.style.display='none';[...scene.querySelectorAll('.layer')].forEach(el=>el.remove());const sorted=[...dream.nodes].sort((a,b)=>a.depth-b.depth);for(const n of sorted){const img=document.createElement('img');img.className='layer '+(n.depth===0?'root':'');img.src=n.image.url;img.alt=n.prompt||'';img.dataset.depth=n.depth;const b=n.rootBounds;Object.assign(img.style,{left:`${b.x*1024}px`,top:`${b.y*1024}px`,width:`${b.width*1024}px`,height:`${b.height*1024}px`,zIndex:String(2+n.depth)});scene.insertBefore(img,selection)}resolution.textContent=dream.stats.peakEquivalentLabel;nodesStat.textContent=`${dream.stats.nodeCount} layer${dream.stats.nodeCount===1?'':'s'}`;maxDepth.textContent=`d${dream.stats.maxDepth}`;renderRail();updateLayerVisibility();if(dream.nodes.length===1)fit()}
+  function renderRail(){nodeList.innerHTML='';[...dream.nodes].sort((a,b)=>b.depth-a.depth).forEach(n=>{const b=document.createElement('button');b.className='node-chip';b.innerHTML=`<span class="node-dot" style="opacity:${Math.max(.35,1-n.depth*.08)}"></span><span class="node-copy"><b>depth ${n.depth}</b><small>${formatPx(n.equivalentPixels)}</small></span>`;b.onclick=()=>focusNode(n);nodeList.appendChild(b)})}
+  function formatPx(n){return n>=1e9?(n/1e9).toFixed(n>=1e10?0:1)+' GP':n>=1e6?(n/1e6).toFixed(n>=1e7?0:1)+' MP':Math.round(n/1e3)+' KP'}
+  function setTransform(){const s=fitScale*zoom;scene.style.transform=`translate(${panX}px,${panY}px) scale(${s})`;zoomLabel.textContent=`${Math.round(zoom*100)}%`;updateLayerVisibility()}
+  function updateLayerVisibility(){const actual=fitScale*zoom;scene.querySelectorAll('.layer').forEach(img=>{const d=Number(img.dataset.depth||0);if(d===0){img.style.opacity='1';return}const threshold=Math.pow(2,d-1)*fitScale*1.15;img.style.opacity=actual>=threshold?'1':String(Math.max(0,(actual/threshold-.55)/.45))})}
+  function fit(){const r=viewport.getBoundingClientRect();fitScale=Math.max(.05,Math.min((r.width-24)/1024,(r.height-24)/1024));zoom=1;panX=(r.width-1024*fitScale)/2;panY=(r.height-1024*fitScale)/2;setTransform()}
+  function focusNode(n){const r=viewport.getBoundingClientRect(),b=n.rootBounds;const targetScale=Math.min(r.width/(b.width*1024),r.height/(b.height*1024))*.72;zoom=Math.max(1,Math.min(128,targetScale/fitScale));const s=fitScale*zoom;panX=r.width/2-(b.x+b.width/2)*1024*s;panY=r.height/2-(b.y+b.height/2)*1024*s;setTransform();toast(`depth ${n.depth} · ${formatPx(n.equivalentPixels)}`)}
+  function scenePoint(e){const r=viewport.getBoundingClientRect(),s=fitScale*zoom;return{x:Math.max(0,Math.min(1,(e.clientX-r.left-panX)/(1024*s))),y:Math.max(0,Math.min(1,(e.clientY-r.top-panY)/(1024*s)))}}
+  function setSelection(a,b){const x=Math.min(a.x,b.x),y=Math.min(a.y,b.y),w=Math.abs(a.x-b.x),h=Math.abs(a.y-b.y);selection.style.display='block';Object.assign(selection.style,{left:`${x*1024}px`,top:`${y*1024}px`,width:`${w*1024}px`,height:`${h*1024}px`});return{x,y,width:w,height:h}}
+  viewport.addEventListener('pointerdown',e=>{if(!dream||busy)return;viewport.setPointerCapture(e.pointerId);if(selectMode){selectionStart=scenePoint(e);setSelection(selectionStart,selectionStart);return}drag={x:e.clientX,y:e.clientY,px:panX,py:panY};viewport.classList.add('dragging')});
+  viewport.addEventListener('pointermove',e=>{if(selectionStart){setSelection(selectionStart,scenePoint(e));return}if(!drag)return;panX=drag.px+e.clientX-drag.x;panY=drag.py+e.clientY-drag.y;setTransform()});
+  viewport.addEventListener('pointerup',async e=>{if(selectionStart){const region=setSelection(selectionStart,scenePoint(e));selectionStart=null;selectMode=false;viewport.classList.remove('selecting');if(region.width<.02||region.height<.02){selection.style.display='none';toast('select a larger region');return}try{toast('recursive pass started');await callTool('dream_deeper',{dream_id:dream.id,region,prompt:''});const newest=dream.nodes[dream.nodes.length-1];focusNode(newest)}catch(err){console.error(err);toast('dream failed')}finally{selection.style.display='none'}return}drag=null;viewport.classList.remove('dragging')});
+  viewport.addEventListener('wheel',e=>{if(!dream)return;e.preventDefault();const before=scenePoint(e),old=zoom;zoom=Math.max(.35,Math.min(128,zoom*Math.exp(-e.deltaY*.0013)));const r=viewport.getBoundingClientRect(),s=fitScale*zoom;panX=e.clientX-r.left-before.x*1024*s;panY=e.clientY-r.top-before.y*1024*s;if(old!==zoom)setTransform()},{passive:false});
+  document.querySelector('#deeper').onclick=()=>{if(!dream)return;selectMode=!selectMode;viewport.classList.toggle('selecting',selectMode);selection.style.display='none';toast(selectMode?'drag over any detail':'selection cancelled')};
+  document.querySelector('#plus').onclick=()=>{zoom=Math.min(128,zoom*1.6);setTransform()};document.querySelector('#minus').onclick=()=>{zoom=Math.max(.35,zoom/1.6);setTransform()};document.querySelector('#fit').onclick=fit;
+  document.querySelector('#fullscreen').onclick=async()=>{try{if(window.openai?.requestDisplayMode)await window.openai.requestDisplayMode({mode:'fullscreen'});else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen()}catch{}}
+  document.querySelector('#create-form').addEventListener('submit',async e=>{e.preventDefault();const input=document.querySelector('#prompt'),p=input.value.trim();if(!p)return;document.querySelector('#create').disabled=true;try{await callTool('dream_image',{prompt:p})}catch(err){console.error(err);toast('generation failed')}finally{document.querySelector('#create').disabled=false}});
+  document.querySelectorAll('.prompt-example').forEach(b=>b.onclick=()=>{document.querySelector('#prompt').value=b.textContent;document.querySelector('#prompt').focus()});
+  const pickImage=document.querySelector('#pick-image');if(window.openai?.selectFiles&&window.openai?.getFileDownloadUrl){pickImage.style.display='inline-block';pickImage.onclick=async()=>{try{const files=await window.openai.selectFiles();const f=files?.[0];if(!f)return;const d=await window.openai.getFileDownloadUrl({fileId:f.fileId});await callTool('dream_from_image',{file:{download_url:d.downloadUrl,file_id:f.fileId,mime_type:f.mimeType,file_name:f.fileName},prompt:'Imported image'})}catch(err){console.error(err);toast('could not import image')}}}
+  window.addEventListener('resize',()=>{if(dream)fit()});
+  fit();
+</script>
+</body>
+</html>
