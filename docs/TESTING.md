@@ -24,7 +24,7 @@ Connect Inspector to `http://127.0.0.1:8787/mcp` and verify all five tools, malf
 
 ## 3. Native UI
 
-Use the mock provider first. Register the tunneled `/mcp` endpoint in ChatGPT Developer mode.
+Use the mock provider first. For full viewer testing, expose the server through public HTTPS so the iframe can load `/assets/...`; Secure MCP Tunnel alone is sufficient for MCP/tool testing but does not expose those asset URLs. Register the public `/mcp` endpoint in ChatGPT Developer mode.
 
 Acceptance:
 - global/sidebar and thread entrypoints open;
