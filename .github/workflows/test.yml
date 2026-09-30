@@ -13,3 +13,17 @@ jobs:
       - run: npm install
       - run: npm run check
       - run: npm test
+      - name: Boot MCP server
+        run: |
+          node server.js > /tmp/z0dream-server.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for i in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:8787/ >/tmp/z0dream-health.json; then
+              cat /tmp/z0dream-health.json
+              exit 0
+            fi
+            sleep 0.5
+          done
+          cat /tmp/z0dream-server.log
+          exit 1
