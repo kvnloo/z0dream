@@ -1,0 +1,23 @@
+{
+  "name": "z0dream",
+  "version": "0.1.0",
+  "description": "Recursive high-resolution dream renderer for ChatGPT. Zoom into anything.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test test/*.test.js",
+    "check": "node --check server.js && node --check src/geometry.js && node --check src/store.js && node --check src/dream-engine.js && node --check src/create-engine.js && node --check src/import-image.js && node --check src/providers/mock.js && node --check src/providers/openai.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.0.1",
+    "@modelcontextprotocol/sdk": "^1.20.2",
+    "openai": "^7.23.0",
+    "sharp": "^0.35.5",
+    "zod": "^3.25.76"
+  }
+}
