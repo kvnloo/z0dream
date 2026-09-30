@@ -1,0 +1,30 @@
+{
+  "name": "z0dream",
+  "version": "0.1.0",
+  "description": "Zoom into anything. Recursively turn generated images into explorable ultra-high-resolution worlds.",
+  "author": {
+    "name": "z0"
+  },
+  "skills": "./skills",
+  "apps": "./.app.json",
+  "interface": {
+    "displayName": "z0dream",
+    "shortDescription": "Zoom into anything.",
+    "longDescription": "Create an image, select any detail, and recursively dream deeper into it. z0dream synthesizes new detail at each zoom level instead of stretching old pixels.",
+    "developerName": "z0",
+    "category": "Creativity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/kvnloo/z0dream",
+    "privacyPolicyURL": "https://github.com/kvnloo/z0dream/blob/main/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/kvnloo/z0dream/blob/main/TERMS.md",
+    "defaultPrompt": [
+      "Use z0dream to create a world I can keep zooming into.",
+      "Open z0dream and let me dream deeper into an image.",
+      "Create an ultra-detailed recursive image with z0dream."
+    ],
+    "brandColor": "#8D64FF"
+  }
+}
