@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>z0dream — Quackles 1GP deep zoom proof</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#050508;color:#fff;font-family:Inter,system-ui,sans-serif;overflow:hidden}
+main{height:100%;display:grid;grid-template-rows:56px 1fr 48px}
+header,footer{display:flex;align-items:center;gap:12px;padding:0 16px;background:rgba(5,5,8,.92);border-color:#ffffff14;border-style:solid;border-width:0 0 1px;z-index:3}
+footer{border-width:1px 0 0;color:#ffffff88;font-size:12px;justify-content:center}
+.brand{font-weight:800;letter-spacing:-.04em}.brand span{color:#9b7cff}.pill{margin-left:auto;border:1px solid #ffffff1c;background:#ffffff0a;border-radius:999px;padding:7px 10px;font:600 11px ui-monospace,monospace;color:#ffffffaa}
+.stage{display:grid;place-items:center;min-height:0;position:relative;background:radial-gradient(circle at 50% 40%,#171026,#07070b 48%,#020204)}
+.frame{height:min(88vh,100%);aspect-ratio:2/3;max-width:94vw;position:relative;box-shadow:0 24px 100px #000a,0 0 0 1px #ffffff18;overflow:hidden;border-radius:14px;background:#0000f2}
+canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab}canvas:active{cursor:grabbing}
+.loading{position:absolute;inset:0;display:grid;place-items:center;background:#050508;color:#ffffffa0;font:600 12px ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase}
+.help{position:absolute;left:14px;bottom:14px;padding:8px 10px;border-radius:9px;background:#000a;border:1px solid #ffffff1c;font-size:11px;color:#ffffffaa;backdrop-filter:blur(12px)}
+</style></head>
+<body><main>
+<header><div class="brand">z0<span>dream</span></div><div>real Quackles deep-zoom proof</div><div id="status" class="pill">loading 1GP pyramid…</div></header>
+<section class="stage"><div class="frame"><canvas id="view"></canvas><div id="loading" class="loading">warming 1.6K base tiles…</div><div class="help">wheel to zoom · drag to pan · 0 to reset</div></div></section>
+<footer>25,820 × 38,730 source · 512px DZI tiles · centre-first loading · 96 MiB decoded LRU · decode paused during motion</footer>
+</main>
+<script type="module">import{DeepZoom}from"./deep-zoom.js";const dz=new DeepZoom({canvas:document.querySelector("#view"),status:document.querySelector("#status"),loading:document.querySelector("#loading")});dz.init();</script>
+</body></html>
