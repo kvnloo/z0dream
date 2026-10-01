@@ -1,0 +1,49 @@
+name: deploy deep-zoom proof
+
+on:
+  push:
+    branches:
+      - feat/quackles-deep-zoom
+    paths:
+      - "demo/**"
+      - ".github/workflows/deep-zoom-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: z0dream-deep-zoom-pages
+  cancel-in-progress: true
+
+jobs:
+  verify-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Quackles 1GP asset surface
+        run: |
+          set -euxo pipefail
+          curl -fsSI https://raw.githubusercontent.com/kvnloo/quackles-assets/main/blue/p0000000/gp/4/0_0.webp
+          node --check demo/deep-zoom.js
+
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p _site
+          cp -R demo/. _site/
+          touch _site/.nojekyll
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
